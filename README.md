@@ -72,7 +72,7 @@ Run Jupyter notebook examples below to learn how to use GEOSNAP2ACM and GEOSNAP2
 
 
  1. NAM_SD_eveything : The output of GEOSNAP2NAM.ipynb 
-<br />This example visualizes all charts and maps including the result of sequence analysis (Just like an image above). Visualizing everything like this creates too many maps and charts. So it is hard to understand what is what. From this reason, charts and maps are divided into the four examples of output visualization below
+<br />This example visualizes all charts and maps including the result of sequence analysis. Visualizing everything like this creates too many maps and charts. So it is hard to understand what is what. From this reason, charts and maps are divided into the four examples of output visualization below
 <br />Video demo: http://173.255.192.133/~suhan/videos/NAM_SD_everything
 
  2. NAM_US_0_INC: The output of GEOSNAP2NAM0_INC_whole.ipynb 
