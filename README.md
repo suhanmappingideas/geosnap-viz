@@ -49,7 +49,7 @@ Run Jupyter notebook examples below to learn how to use GEOSNAP2ACM and GEOSNAP2
 #### GEOSNAP2ACM 
  1. ACM_SD_ACM_only : The output of ACM_only.ipynb. 
 <br />It visualizes selected variables by using Adaptive Choropleth Mapper.
-<br />Video demo: http://sarasen.asuscomm.com/ACM
+<br />Video demo: http://su-gis.iptime.org/ACM
 
  2. ACM_SD_correlogram: The output of ACM_correlogram.ipynb. 
 <br />It visualizes the matrix of scatter plots.
