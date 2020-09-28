@@ -29,7 +29,7 @@ var Map_height = "400px";                                  // min 300px
 /////////////////////////////////////////////////////////////////
 
 //option for class(the classification method): equal, quantile, std, arithmetic, geometric, quantile
-//option for count(the number of classes): 1 to 8  (Only Red color scheme has up to 10)
-//options for color scheme of INC map: Green, Blue, Orange, Red, Pink
+//option for count(the number of classes): 1 to 9
+//options for color: Green, Blue, Orange, Red, Pink
 
-var mapAclassification = {class: 'equal', count: 10, color: 'Red'};
+var mapAclassification = {class: 'equal', count: 9, color: 'Red'};

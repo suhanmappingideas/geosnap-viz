@@ -16,8 +16,6 @@ var Distribution_INC2_different_cluster = true;				//density chart: INC changes 
 var Temporal_change_in_neighborhoods = true;				//stacked chart: Temporal Change in Neighborhoods over years
 var Parallel_Categories_Diagram_in_neighborhoods = true;	//parallel categories diagram
 var Chord_Diagram_in_neighborhoods = true;					//chord diagram
-var Zscore_Means_across_Clusters = true;                    //heatmap: Z Score Means across Clusters
-var Zscore_Means_of_Each_Cluster = true;                    //barchart: Z Score Means of Each Cluster
   
 
 var Num_Of_Decimal_Places = 2;                             // default = 2
@@ -34,4 +32,4 @@ var Map_height = "400px";                                  // min 300px
 //option for count(the number of classes): 1 to 9
 //options for color: Green, Blue, Orange, Red, Pink
 
-var mapAclassification = {class: 'equal', count: 8, color: 'Red'};
+var mapAclassification = {class: 'equal', count: 9, color: 'Red'};
