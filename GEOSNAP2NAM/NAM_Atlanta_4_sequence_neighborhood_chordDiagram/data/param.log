@@ -1,9 +1,14 @@
-2020-01-29 08:26:36
+2020-09-28 17:23:07
   {'Chord_Diagram_in_neighborhoods': True,
    'Maps_of_neighborhood': True,
    'Sequence': {'dist_type': 'tran', 'seq_clusters': 5},
    'county_fips': None,
    'filename_suffix': 'Atlanta_4_sequence_neighborhood_chordDiagram',
+   'labels': ['% white (non-Hispanic)',
+              '% black (non-Hispanic)',
+              '% Hispanic',
+              '% Native American race',
+              '% Asian and Pacific Islander race'],
    'method': 'skater',
    'msa_fips': '12060',
    'nClusters': 8,
