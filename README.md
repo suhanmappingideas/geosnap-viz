@@ -1,4 +1,4 @@
-<p align="center">
+<p align="center"> 
 <img height=200 src="images/geosnap_viz.png" alt="geosnap"/>
 </p>
 
