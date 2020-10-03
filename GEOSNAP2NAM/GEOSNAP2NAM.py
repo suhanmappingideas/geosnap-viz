@@ -1,11 +1,16 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-import json, math, copy
-from geosnap.data import store_ltdb
-from geosnap.data import Community
-from geosnap.data import store_census
-from geosnap.data import data_store
+
+import json, math, copy, sys
+#from geosnap.data import store_ltdb
+from geosnap.io import store_ltdb
+#from geosnap.data import Community
+from geosnap import Community, datasets
+#from geosnap.data import store_census
+from geosnap.io import store_census
+#from geosnap.data import data_store
+
 import pandas as pd
 import shapely.wkt
 import shapely.geometry
@@ -17,7 +22,10 @@ import urllib.parse
 import webbrowser
 import os
 import pprint
-
+from sklearn.preprocessing import minmax_scale
+import numpy as np
+from scipy import stats
+from notebook import notebookapp
 
 # Print iterations progress
 def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
@@ -68,7 +76,7 @@ def write_INDEX_html(param):
 	
 	contents = []
 	#open Neighborhood_Analysis_Mapper.html (the excutable file for the visualization)
-	ifile = open("template/Neighborhood_Analysis_Mapper.html", "r")
+	ifile = open("template/Neighborhood_Analysis_Mapper.html", "r", encoding="utf-8")
 	contents = ifile.read()
 	
 	#Replace variables based on the user's selection in each of four files below.
@@ -78,7 +86,7 @@ def write_INDEX_html(param):
 	contents = contents.replace("data/GEO_VARIABLES.js", "data/GEO_VARIABLES_"+param['filename_suffix']+".js")
 	
 	#write new outfiles: GEO_CONFIG.js GEO_JSON.js VARIABLES.js
-	ofile = open(oDir+"/index.html", "w")
+	ofile = open(oDir+"/index.html", "w", encoding="utf-8")
 	ofile.write(contents)
 	ofile.close()
 
@@ -91,7 +99,7 @@ def write_ALL_METROS_INDEX_html(param):
 	
 	contents = []
 	#open Adaptive_Choropleth_Mapper.html (the excutable file for the visualization)
-	ifile = open("template/Adaptive_Choropleth_Mapper.html", "r")
+	ifile = open("template/Adaptive_Choropleth_Mapper.html", "r", encoding="utf-8" )
 	contents = ifile.read()
 	
 	#Replace variables based on the user's selection in each of four files below.
@@ -101,25 +109,27 @@ def write_ALL_METROS_INDEX_html(param):
 	contents = contents.replace("data/GEO_VARIABLES.js", "data/GEO_VARIABLES_"+param['filename_suffix']+".js")
 	
 	#write new outfiles: GEO_CONFIG.js GEO_JSON.js VARIABLES.js
-	ofile = open(oDir+"/index.html", "w")
+	ofile = open(oDir+"/index.html", "w", encoding="utf-8")
 	ofile.write(contents)
 	ofile.close()
 
 
 def write_GEO_CONFIG_js(param):
 	# read ACM_GEO_CONFIG.js
-	ifile = open("template/NAM_GEO_CONFIG.js", "r")
+	ifile = open("template/NAM_GEO_CONFIG.js", "r", encoding="utf-8")
 	contents = ifile.read()
 	
 	allMetros = False;
-	Index_of_neighborhood_change = False;
+	Index_of_neighborhood_change = True;
 	Maps_of_neighborhood = True;               
-	Distribution_INC1 = False;                  
+	Distribution_INC1 = True;                  
 	Distribution_period = False; 
 	Distribution_cluster = False;
-	Temporal_change_in_neighborhoods = False;
-	Parallel_Categories_Diagram_in_neighborhoods = False;
-	Chord_Diagram_in_neighborhoods = False;
+	Temporal_change_in_neighborhoods = True;
+	Parallel_Categories_Diagram_in_neighborhoods = True;
+	Chord_Diagram_in_neighborhoods = True;
+	Zscore_Means_across_Clusters = True;
+	Zscore_Means_of_Each_Cluster = True;
 	
 	if ('allMetros' in param): allMetros =  param['allMetros']
 	if ('Index_of_neighborhood_change' in param): Index_of_neighborhood_change =  param['Index_of_neighborhood_change']
@@ -130,6 +140,8 @@ def write_GEO_CONFIG_js(param):
 	if ('Temporal_change_in_neighborhoods' in param): Temporal_change_in_neighborhoods =  param['Temporal_change_in_neighborhoods']
 	if ('Parallel_Categories_Diagram_in_neighborhoods' in param): Parallel_Categories_Diagram_in_neighborhoods =  param['Parallel_Categories_Diagram_in_neighborhoods']
 	if ('Chord_Diagram_in_neighborhoods' in param): Chord_Diagram_in_neighborhoods =  param['Chord_Diagram_in_neighborhoods']
+	if ('Zscore_Means_across_Clusters' in param): Zscore_Means_across_Clusters =  param['Zscore_Means_across_Clusters']
+	if ('Zscore_Means_of_Each_Cluster' in param): Zscore_Means_of_Each_Cluster =  param['Zscore_Means_of_Each_Cluster']
 	
 	# perpare parameters
 	#NumOfMaps = len(param['years']) + 1
@@ -141,21 +153,26 @@ def write_GEO_CONFIG_js(param):
 		InitialLayers.append(str(year))
 	
 	# Automatically set Map_width, Map_height. 
-	Map_width = "350px"
+	Map_width = "300px"
 	Map_height = "300px"
+	if (NumOfMaps <= 6):
+		Map_width = "300px"
+		Map_height = "300px"	
 	if (NumOfMaps <= 5):
+		Map_width = "350px"
+		Map_height = "350px"
+	if (NumOfMaps <= 4):
 		Map_width = "400px"
 		Map_height = "400px"
-	if (NumOfMaps <= 4):
-		Map_width = "500px"
-		Map_height = "500px"
 	if (NumOfMaps <= 3):
-		Map_width = "650px"
-		Map_height = "650px"
+		Map_width = "400px"
+		Map_height = "400px"
 	if (NumOfMaps <= 2):
-		Map_width = "1000px"
-		Map_height = "1000px"
-		
+		Map_width = "450px"
+		Map_height = "450px"
+	if (NumOfMaps ==	1):
+		Map_width = "800px"
+		Map_height = "800px"	
 	# replace newly computed "NumOfMaps", "InitialLayers", "Map_width", "Map_height" in CONFIG.js. See the example replacement below
 	'''
 		'years': [1980, 1990, 2000, 2010]            ->    'var InitialLayers = ["INC", "1980", "1990", "2000", "2010"];'
@@ -171,6 +188,8 @@ def write_GEO_CONFIG_js(param):
 	Temporal_change_in_neighborhoods = "var Temporal_change_in_neighborhoods = " + json.dumps(Temporal_change_in_neighborhoods)+ ";"
 	Parallel_Categories_Diagram_in_neighborhoods = "var Parallel_Categories_Diagram_in_neighborhoods = " + json.dumps(Parallel_Categories_Diagram_in_neighborhoods)+ ";"
 	Chord_Diagram_in_neighborhoods = "var Chord_Diagram_in_neighborhoods = " + json.dumps(Chord_Diagram_in_neighborhoods)+ ";"
+	Zscore_Means_across_Clusters = "var Zscore_Means_across_Clusters = " + json.dumps(Zscore_Means_across_Clusters)+ ";"
+	Zscore_Means_of_Each_Cluster = "var Zscore_Means_of_Each_Cluster = " + json.dumps(Zscore_Means_of_Each_Cluster)+ ";"
 	Map_width = 'var Map_width  = "' + Map_width + '";'
 	Map_height = 'var Map_height = "' + Map_height + '";'
    
@@ -185,19 +204,21 @@ def write_GEO_CONFIG_js(param):
 	contents = contents.replace("var Temporal_change_in_neighborhoods = true;", Temporal_change_in_neighborhoods)
 	contents = contents.replace("var Parallel_Categories_Diagram_in_neighborhoods = true;", Parallel_Categories_Diagram_in_neighborhoods)
 	contents = contents.replace("var Chord_Diagram_in_neighborhoods = true;", Chord_Diagram_in_neighborhoods)
+	contents = contents.replace("var Zscore_Means_across_Clusters = true;", Zscore_Means_across_Clusters)
+	contents = contents.replace("var Zscore_Means_of_Each_Cluster = true;", Zscore_Means_of_Each_Cluster)
 	contents = contents.replace('var Map_width  = "400px";', Map_width)
 	contents = contents.replace('var Map_height = "400px";', Map_height)
 
 	#Write output including the replacement above
 	filename_GEO_CONFIG = "NAM_" + param['filename_suffix'] + "/data/GEO_CONFIG_"+param['filename_suffix']+".js"
-	ofile = open(filename_GEO_CONFIG, 'w')
+	ofile = open(filename_GEO_CONFIG, 'w', encoding="utf-8")
 	ofile.write(contents)
 	ofile.close()
 
 
 def write_ALL_METROS_GEO_CONFIG_js(param):
 	# read GEO_CONFIG.js
-	ifile = open("template/ACM_GEO_CONFIG.js", "r")
+	ifile = open("template/ACM_GEO_CONFIG.js", "r", encoding="utf-8")
 	contents = ifile.read()
 	
 	Stacked_Chart = False;
@@ -240,7 +261,7 @@ def write_ALL_METROS_GEO_CONFIG_js(param):
 
 	#Write output including the replacement above
 	filename_GEO_CONFIG = "NAM_" + param['filename_suffix'] + "/data/GEO_CONFIG_"+param['filename_suffix']+".js"
-	ofile = open(filename_GEO_CONFIG, 'w')
+	ofile = open(filename_GEO_CONFIG, 'w', encoding="utf-8")
 	ofile.write(contents)
 	ofile.close()
 
@@ -314,6 +335,8 @@ def write_GEO_VARIABLES_js(community, param):
 	nClusters   = param['nClusters']
 	years       = param['years']
 	variables   = param['variables']
+	labels      = param['labels']
+	
 	seqClusters = 5
 	distType    = 'tran'
 	#if ('Sequence' in param and type(param['Sequence']) is dict and 'seq_clusters' in param['Sequence']): 
@@ -328,6 +351,8 @@ def write_GEO_VARIABLES_js(community, param):
 	# filtering by years
 	community.gdf = community.gdf[community.gdf.year.isin(years)]
 	#print(community.gdf)
+	community.gdf.to_csv(r'output.csv')    
+    
 	
 	# clustering by method, nClusters with filtering by variables
 	#clusters = geosnap.analyze.cluster(community, method=method, n_clusters=nClusters, columns=variables)
@@ -362,12 +387,84 @@ def write_GEO_VARIABLES_js(community, param):
 		#print(yearList)
 		# calculate INC
 		incs = linc(yearList)
+		#print(incs)
+		#incs = minmax_scale(incs, feature_range=(0,1), axis=0)
+		#print(incs)		
 		# insert INC to first column of df_pivot
 		df_pivot.insert(loc=0, column='INC', value=incs)
 	
 	if ('Sequence' not in param or not param['Sequence']): df_pivot.drop(columns=['Sequence'], inplace=True)
 	#if ('Sequence' not in param or type(param['Sequence']) is not dict): df_pivot.drop(columns=['Sequence'], inplace=True)
 	#print(df_pivot)
+	
+	# calculate zscore
+	clusters_flattened = pd.DataFrame(df_pivot.to_records())                   # convert pivot to data frame
+	geoids = clusters_flattened["geoid"].tolist()                              # get list of geoids from pivot
+	valid_gdf = community.gdf[community.gdf.geoid.isin(geoids)]                # get all rows of valid geoids from community.gdf
+	#print("clusters_flattened:", clusters_flattened)
+	#print("geoids: ", len(geoids))
+	#print("geoids:", geoids)
+	#print("valid_gdf:", valid_gdf)
+	
+	lastClusterNo = 0
+	for y, year in enumerate(years):
+		maxClusterNo_theYear = clusters_flattened[str(year)].max()
+		if (lastClusterNo < maxClusterNo_theYear): 
+			lastClusterNo = maxClusterNo_theYear
+	#print("lastClusterNo:", lastClusterNo)
+	nGeneratedClusters = lastClusterNo + 1
+	
+	# get sum of the each cluster and count of the each cluster
+	zValue = [[0 for v in range(len(variables))] for c in range(nGeneratedClusters)]
+	zCount = [[0 for v in range(len(variables))] for c in range(nGeneratedClusters)]
+	for v, variable in enumerate(variables):
+		#if (v > 0): break
+		theVariable_pivot = valid_gdf.pivot(index='geoid', columns='year', values=variable)
+		theVariable_flattened = pd.DataFrame(theVariable_pivot.to_records())   # convert pivot to data frame
+		#print(theVariable_pivot)
+		#print("theVariable_flattened: ", variable)
+		#print(theVariable_flattened)
+		if (theVariable_flattened.shape[0] != len(geoids)):                    # check number of pivot and valid geoids
+			print("Number of valid geoid not equal pivot of '" + variable +"'")
+			print("Number of geoids: ", len(geoids))
+			print("Number of pivot : ", theVariable_flattened.shape[0])
+			continue
+		
+		# make a variable list of all years from pivot
+		theVariableList = np.array([])
+		for y, year in enumerate(years):
+			theYearList = theVariable_flattened[str(year)].tolist()
+			theVariableList = np.append(theVariableList, theYearList)
+		#print("theVariableList: ", theVariableList.shape[0], theVariableList)
+		
+		theVariableZscore = stats.zscore(theVariableList)                      # calculate zscore
+		#print("theVariableZscore: ", theVariableZscore.shape[0], theVariableZscore)
+		
+		for y, year in enumerate(years):
+			i = y * clusters_flattened.shape[0]
+			for j, row in clusters_flattened.iterrows():
+				cluster = row[str(year)]
+				#print("zValue[%d][%d] += theVariableZscore[%d]" % (cluster, v, i+j))
+				zValue[cluster][v] += theVariableZscore[i+j]                   # accumulate zscore to the position of cluster
+				zCount[cluster][v] += 1                                        # count up by 1 to the position of cluster
+	#print(zValue)
+	#print(zCount)
+	
+	# calculate average of zscore
+	zScore = [[0 for v in range(len(variables))] for c in range(nGeneratedClusters)]
+	for v, variable in enumerate(variables):
+		for c in range(nGeneratedClusters):
+			if (zCount[c][v] != 0): zScore[c][v] = round(zValue[c][v] / zCount[c][v], 2)
+	#print(zScore)
+	
+	#for c in range(nGeneratedClusters):
+	#	print("Cluster", c, zScore[c])
+	#for v, variable in enumerate(variables):
+	#	scores = []
+	#	for c in range(nGeneratedClusters): 
+	#		scores.append(zScore[c][v])
+	#	print(variable, scores)
+		
 	
 	# write df_pivot to GEO_VARIABLES.js
 	filename_GEO_VARIABLES = "NAM_" + param['filename_suffix'] + "/data/GEO_VARIABLES_"+param['filename_suffix']+".js"
@@ -392,116 +489,23 @@ def write_GEO_VARIABLES_js(community, param):
 		ofile.write('  '+json.dumps(aLine)+',\n')
 	#print("GEO_VARIABLES.js write count:", wCount)
 	ofile.write(']\n')
-	ofile.close()
+	
+	# write zscore to GEO_VARIABLES.js
+	ofile.write('\n')
+	ofile.write('var GEO_ZSCORES =\n')
+	ofile.write('{\n')
+	ofile.write('  "xAxis": [\n')
+	for v, variable in enumerate(labels):
+		ofile.write('    "'+variable+'",\n')
+	ofile.write('  ],\n')
+	ofile.write('  "yAxis": '+json.dumps(["C"+str(c) for c in range(nGeneratedClusters)])+',\n')
+	ofile.write('  "data" : [\n')
+	for z, row in enumerate(zScore):
+		ofile.write('    '+json.dumps(row)+',\n')
+	ofile.write('  ],\n')
+	ofile.write('}\n')
 
-'''
-def write_ALL_METROS_VARIABLES_js(metros, param):
-	geoid       = metros.columns[0]
-	method      = param['method']
-	nClusters   = param['nClusters']
-	years       = param['years']
-	variables   = param['variables']
-	seqClusters = 5
-	distType    = 'tran'
-	
-	if ('Sequence' in param and type(param['Sequence']) is dict):
-		if ('seq_clusters' in param['Sequence']): seqClusters = param['Sequence']['seq_clusters']
-		if ('dist_type' in param['Sequence']): distType = param['Sequence']['dist_type']
-	
-	#msas = data_store.msa_definitions
-	#for column in msas.columns:
-	#	print(column)
-	#print(msas)
-	
-	#community = Community.from_ltdb(years=years, msa_fips="10220")
-	#community = Community.from_ltdb(years=years)
-	#community.gdf = community.gdf[['geoid', 'year']]
-	#print(community.gdf)
-	#print(variables)
-	#print(variables.append(['geoid', 'year']))
-	#print(variables)
-	#return
-	
-	# Initial call to print 0% progress
-	printProgressBar(0, len(metros.index), prefix = 'Progress:', suffix = 'Complete', length = 50)
-	
-	readCount = 0
-	outList = []
-	for index, metro in metros.iterrows():
-		#if (index > 10): break
-		#if (index != 3): continue
-		#print(index, metro['geoid'], metro['name'])
-		metroid = metro['geoid']
-		p = metro['name'].rfind(', ')
-		#if (p < 0): print(index, metro['geoid'], metro['name'], p)
-		metroname = metro['name'][:p]
-		stateabbr = metro['name'][p+2:]
-		#print(index, metroid, stateabbr, metroname)
-		
-		try:
-			community = Community.from_ltdb(years=years, msa_fips=metroid)
-		except ValueError:
-			continue
-		#printProgressBar(index, len(metros.index), prefix = 'Progress:', suffix = 'Complete', length = 50)
-		#continue
-		
-		if (len(community.gdf.index) <= 0): continue
-		#print(community.gdf.columns)
-		#for column in community.gdf.columns:
-		#	print(column)
-		#print(community)
-		#print(community.gdf)
-		
-		# clustering by method, nClusters with filtering by variables
-		try:
-			clusters = community.cluster(columns=variables, method=method, n_clusters=nClusters)
-		except KeyError:
-			continue
-		#print(clusters.gdf)
-		#print(clusters.gdf[['year', 'geoid', 'kmeans']])
-		
-		# get pivot from clusters
-		df_pivot = clusters.gdf.pivot(index='geoid', columns='year', values='kmeans')
-		#print(df_pivot)
-		#print(len(df_pivot.index))
-		#print(df_pivot.columns)
-		
-		if (len(df_pivot.columns) > 1):										# 1980, 1990, 2000, 2010
-			# convert df_pivot to list for INCS.linc
-			yearList = []
-			for year in df_pivot.columns:
-				aYearList = df_pivot[year].values.tolist()
-				aYearList = list(map(float, aYearList)) 
-				yearList.append(aYearList)
-			#print(yearList)
-			# calculate INC
-			incs = linc(yearList)
-			#print(incs)
-			ave = sum(incs) / len(incs) if (len(incs) != 0) else -9999
-			#print("ave:", ave)
-			#print(index, metroid, ave, stateabbr, metroname)
-			readCount += len(incs)
-			outList.append([metroid, ave])
-			printProgressBar(index, len(metros.index), prefix = 'Progress:', suffix = 'Complete', length = 50)
-	printProgressBar(len(metros.index), len(metros.index), prefix = 'Progress:', suffix = 'Complete', length = 50)
-	#print(outList)
-	print("readCount:", readCount)
-	
-	# write df_pivot to GEO_VARIABLES.js
-	filename_GEO_VARIABLES = "NAM_" + param['filename_suffix'] + "/data/GEO_VARIABLES_"+param['filename_suffix']+".js"
-	ofile = open(filename_GEO_VARIABLES, 'w')
-	ofile.write('var GEO_VARIABLES =\n')
-	ofile.write('[\n')
-	heading = [geoid, 'INC']
-	ofile.write('  '+json.dumps(heading)+',\n')
-	wCount = 0
-	for i, row in enumerate(outList):
-		wCount += 1
-		ofile.write('  '+json.dumps(row)+',\n')
-	#print("GEO_VARIABLES.js write count:", wCount)
-	ofile.write(']\n')
 	ofile.close()
-'''
 
 def write_ALL_METROS_VARIABLES_js(metros, param):
 	geoid       = metros.columns[0]
@@ -518,20 +522,20 @@ def write_ALL_METROS_VARIABLES_js(metros, param):
 	
 	printProgressBar(-1, len(metros.index), prefix = 'Progress:', suffix = 'Initializing', length = 50)
 	
-	states = data_store.states(convert=False)								# [56 rows x 3 columns]
+	states = datasets.states(convert=False)								# [56 rows x 3 columns]
 	#print(states)
 	#print(states["geoid"].tolist())
 	
-	counties = data_store.counties(convert=False)							# [3233 rows x 2 columns]
+	counties = datasets.counties(convert=False)							# [3233 rows x 2 columns]
 	#print(counties)
 	
-	ltdb = data_store.ltdb													# [330388 rows x 192 columns]
+	ltdb = datasets.ltdb													# [330388 rows x 192 columns]
 	#for column in ltdb.columns:
 	#	print(column)
 	#print(ltdb.memory_usage(index=True, deep=True).sum())
 	#print(ltdb)
 	
-	msas = data_store.msa_definitions										# [1915 rows x 13 columns]
+	msas = datasets.msa_definitions										# [1915 rows x 13 columns]
 	#for column in msas.columns:
 	#	print(column)
 	msas.set_index('stcofips', inplace=True)
@@ -618,8 +622,9 @@ def write_ALL_METROS_VARIABLES_js(metros, param):
 		#for column in community.gdf.columns:
 		#	print(column)
 		#print(community)
+		#community.gdf.to_csv(r'output.csv')
 		#print(community.gdf)
-		
+		#print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")		
 		# clustering by method, nClusters with filtering by variables
 		#try:
 		if (method == 'kmeans' or method == 'ward' or method == 'affinity_propagation' or method == 'spectral' or method == 'gaussian_mixture' or method == 'hdbscan'):
@@ -630,7 +635,7 @@ def write_ALL_METROS_VARIABLES_js(metros, param):
 				
 		if (method == 'ward_spatial' or method == 'spenc' or method == 'skater' or method == 'azp' or method == 'max_p'):
 			try:
-				clusters = community.cluster_spatial(columns=variables, method=method, n_clusters=nClusters)
+				clusters = community.cluster_spatial(columns=variables, method=method, n_clusters=nClusters) #, spatial_weights='rook'
 			except KeyError:
 				continue
 		#except KeyError:
@@ -690,7 +695,8 @@ def Clustering_viz(param):
 	if ('allMetros' in param and param['allMetros']):
 		#metros = data_store.msa_definitions
 		#print(metros)
-		metros = data_store.msas()
+		#metros = data_store.msas()
+		metros = datasets.msas()
 	elif ('msa_fips' in param and param['msa_fips']):
 		community = Community.from_ltdb(years=param['years'], msa_fips=param['msa_fips'])
 		#community = Community.from_ltdb(msa_fips=param['msa_fips'])
@@ -698,7 +704,24 @@ def Clustering_viz(param):
 		community = Community.from_ltdb(years=param['years'], county_fips=param['county_fips'])
 	elif ('state_fips' in param and param['state_fips']):
 		community = Community.from_ltdb(years=param['years'], state_fips=param['state_fips'])
+	
+	community.gdf = community.gdf.replace([np.inf, -np.inf], np.nan)
+	
+	# check if geometry is not null for Spatial Clustering
+	community.gdf = community.gdf[pd.notnull(community.gdf['geometry'])]
 	#print(community.gdf)
+	
+	# filtering if geometry is not null
+	#community.gdf = community.gdf[pd.notnull(community.gdf['geometry'])]
+	#community.gdf = community.gdf.dropna()
+	#print(community.gdf.dropna())
+	#community.gdf = community.gdf[pd.notnull(community.gdf['p_household_recent_move'])]
+	#community.gdf = community.gdf.replace([np.inf, -np.inf], np.nan)
+	#p_household_recent_move = community.gdf[['geoid', 'p_household_recent_move']].copy()
+	#print(p_household_recent_move)
+	#for aTract in p_household_recent_move.itertuples():
+	#	print(aTract)
+	#print(community.gdf.replace([np.inf, -np.inf], np.nan))
 	
 	codebook = pd.read_csv('template/conversion_table_codebook.csv')
 	codebook.set_index(keys='variable', inplace=True)
@@ -735,12 +758,18 @@ def Clustering_viz(param):
 		write_ALL_METROS_VARIABLES_js(metros, param)
 		write_ALL_METROS_JSON_js(metros, param)
 	
-	local_dir = os.path.dirname(os.path.realpath(__file__))
-	#print(local_dir)
+	#local_dir = os.path.dirname(os.path.realpath(__file__))
+	servers = list(notebookapp.list_running_servers())
+	servers1 = 'https://cybergisx.cigi.illinois.edu'+servers[0]["base_url"]+ 'notebook'
+	cwd = os.getcwd()
+	prefix_cwd = "/home/jovyan/work"
+	cwd = cwd.replace(prefix_cwd, "")
+	local_dir = servers1 + cwd
+	print(local_dir)
 	fname =urllib.parse.quote('index.html')
 	template_dir = os.path.join(local_dir, 'NAM_' + param['filename_suffix'])
 	url = 'file:' + os.path.join(template_dir, fname)
-	#print(url)
+	print(url)
 	webbrowser.open(url)	
 	
 	print('Please run ' + '"NAM_' + param['filename_suffix']+'/index.html"'+' to your web browser.')
@@ -763,7 +792,7 @@ def Clustering_log():
 		if (not os.path.exists(logfile)): continue
 		#print(fullpath, logfile)
 		# read param.log
-		ifile = open(logfile, "r")
+		ifile = open(logfile, "r", encoding="utf-8")
 		wholetext = ifile.read()
 		contents = wholetext.split('\n', maxsplit=1)
 		if (len(contents) != 2): continue
@@ -828,17 +857,17 @@ if __name__ == '__main__':
 	timeHHMMSS = started_datetime.strftime('%H%M%S')
 	print('GEOSNAP2NAM start at %s %s' % (started_datetime.strftime('%Y-%m-%d'), started_datetime.strftime('%H:%M:%S')))
 	
-	#sample = "downloads/LTDB_Std_All_Sample.zip"
-	#full = "downloads/LTDB_Std_All_fullcount.zip"
-	#store_ltdb(sample=sample, fullcount=full)
-	#store_census()
+	sample = "downloads/LTDB_Std_All_Sample.zip"
+	full = "downloads/LTDB_Std_All_fullcount.zip"
+	store_ltdb(sample=sample, fullcount=full)
+	store_census()
 	
-	param = {
+	param1 = {
 		'title': "Neighborhood Analysis: Kmeans, 1980~2010, 4 variables",
 		'filename_suffix': "All",
 		'allMetros': True,
 		'years': [1980, 1990, 2000, 2010],
-		'method': "ward_spatial",
+		'method': "kmeans",
 		'nClusters': 8,
 		'variables': [
 					  "p_nonhisp_white_persons", 
@@ -849,41 +878,105 @@ if __name__ == '__main__':
 					 ],
 	}
 	
-	param1 = {
-		'title': "Neighborhood Analysis: Kmeans, San Diego",
-		'filename_suffix': "San Diego1",				 # "Albertville"
+	param2 = {
+		'title': "Neighborhood Analysis: kmeans, IL",
+		'filename_suffix': "Illinois_kmeans_Cluster6",				 # "Albertville"
 		#'filename_suffix': "Albertville",				 # "Albertville"
 		#'database': "ltdb",
-		#'state_fips': None,
-		'msa_fips': "41740",						 # "10700"
+		'state_fips': "17",
+		#'msa_fips': "16980",						 # "10700" LA:31080 SD:41740
 		#'msa_fips': "10700",						 # "10700"
-		#'county_fips': None,
-		'years': [1980, 1990, 2000, 2010],           # Available years: 1970, 1980, 1990, 2000 and 2010
-		'method': "kmeans",                          # affinity_propagation, gaussian_mixture, hdbscan, kmeans, spectral, ward   
-		'nClusters': 8,                              # This option should be commented out for affinity_propagation and hdbscan
+		#'county_fips': "06037",                         # LA county: 06037, LA Orange county: 06059,  Chicago:1701
+		'years': [2010],           # Available years: 1970, 1980, 1990, 2000 and 2010
+		'method': "kmeans",   # Aspatial Clustering: affinity_propagation, gaussian_mixture, hdbscan, kmeans, spectral, ward
+                                # Spatial Clustering: azp, max_p, skater, spenc, ward_spatial   
+		'nClusters': 6,                              # This option should be commented out for affinity_propagation and hdbscan
 		'variables': [
-					  "p_nonhisp_white_persons", 
-					  "p_nonhisp_black_persons", 
-					  "p_hispanic_persons", 
-					  "p_native_persons", 
-					  "p_asian_persons",
+            "p_nonhisp_white_persons",
+            "p_nonhisp_black_persons",
+            "p_hispanic_persons",
+            "p_asian_persons",
+            "p_foreign_born_pop",
+            "p_edu_college_greater",
+            "p_unemployment_rate",
+            #"p_employed_professional",
+            "p_employed_manufacturing",
+            "p_poverty_rate",
+            "p_vacant_housing_units",
+            "p_owner_occupied_units",
+            "p_housing_units_multiunit_structures",
+            "median_home_value",
+            "p_structures_30_old",
+            "p_household_recent_move",
+            "p_persons_under_18",
+            "p_persons_over_60",
 					 ],
 		#'Sequence': True,
 		#'seq_clusters': 5,
 		#'dist_type': 'tran',						 # hamming, arbitrary
-		'Sequence': {'seq_clusters': 5, 'dist_type': 'tran'},
+		#'Sequence': {'seq_clusters': 2, 'dist_type': 'tran'},
 		#'Sequence': False,
 		# optional visualization below.
 		'Index_of_neighborhood_change': True,        #choropleth map: Maps representing index of neighborhood Change
 		'Maps_of_neighborhood': True,                #choropleth map: Maps representing clustering result		
 		'Distribution_INC1': True,                   #density chart: INC changes as the map extent changes 
-		'Distribution_INC2_different_period': True,  #density chart: INC changes by different years
-		'Distribution_INC2_different_cluster': True, #density chart: INC changes by different clusters
+		#'Distribution_INC2_different_period': True,  #density chart: INC changes by different years
+		#'Distribution_INC2_different_cluster': True, #density chart: INC changes by different clusters
 		'Temporal_change_in_neighborhoods': True,    #stacked chart: Temporal Change in Neighborhoods over years		
 		'Parallel_Categories_Diagram_in_neighborhoods': True,
 		'Chord_Diagram_in_neighborhoods': True,
+		'Zscore_Means_across_Clusters': True,
+		'Zscore_Means_of_Each_Cluster': True, 
 	}
-	
+
+	param = {
+		'title': "Neighborhood Analysis: kmeans, San Diego",
+		'filename_suffix': "SD_1_neighborhood", 				 # "Albertville"
+		#'filename_suffix': "Albertville",				 # "Albertville"
+		#'database': "ltdb",
+		#'state_fips': "17",
+		'msa_fips': "41740",						 # "10700" LA:31080 SD:41740
+		#'msa_fips': "10700",						 # "10700"
+		#'county_fips': "06037",                         # LA county: 06037, LA Orange county: 06059,  Chicago:1701
+		'years': [1980, 1990, 2000, 2010],           # Available years: 1970, 1980, 1990, 2000 and 2010
+		'method': "kmeans",   # Aspatial Clustering: affinity_propagation, gaussian_mixture, hdbscan, kmeans, spectral, ward
+                                # Spatial Clustering: azp, max_p, skater, spenc, ward_spatial   
+		'nClusters': 6,                              # This option should be commented out for affinity_propagation and hdbscan
+		'variables': [
+            "p_nonhisp_white_persons",
+            "p_nonhisp_black_persons",
+            "p_hispanic_persons",
+            "p_asian_persons",
+            "p_foreign_born_pop",
+            "p_edu_college_greater",
+            "p_unemployment_rate",
+            #"p_employed_professional",
+            "p_employed_manufacturing",
+            "p_poverty_rate",
+            "p_vacant_housing_units",
+            "p_owner_occupied_units",
+            "p_housing_units_multiunit_structures",
+            "median_home_value",
+            "p_structures_30_old",
+            "p_household_recent_move",
+            "p_persons_under_18",
+            "p_persons_over_60",
+					 ],
+						 # hamming, arbitrary
+		'Sequence': {'seq_clusters': 2, 'dist_type': 'tran'},
+		# optional visualization below.
+		'Index_of_neighborhood_change': True,        #choropleth map: Maps representing index of neighborhood Change
+		'Maps_of_neighborhood': True,                #choropleth map: Maps representing clustering result		
+		'Distribution_INC1': True,                   #density chart: INC changes as the map extent changes 
+		#'Distribution_INC2_different_period': True,  #density chart: INC changes by different years
+		#'Distribution_INC2_different_cluster': True, #density chart: INC changes by different clusters
+		'Temporal_change_in_neighborhoods': True,    #stacked chart: Temporal Change in Neighborhoods over years		
+		'Parallel_Categories_Diagram_in_neighborhoods': True,
+		'Chord_Diagram_in_neighborhoods': True,
+		'Zscore_Means_across_Clusters': True,
+		'Zscore_Means_of_Each_Cluster': True, 
+	}
+
 	
 	Clustering_viz(param)
 	#Clustering_log()
