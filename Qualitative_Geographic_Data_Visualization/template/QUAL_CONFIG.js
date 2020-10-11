@@ -6,8 +6,8 @@ var InitialLayers = [];
 //var Initial_map_center = [34.0522, -117.9];  
 //var Initial_map_zoom_level = 8;   
 
-var Maps_of_neighborhood = true;							//choropleth map: Maps representing clustering result  
-var Temporal_change_in_neighborhoods = true;				//stacked chart: Temporal Change in Neighborhoods over years
+var Maps_of_neighborhood = true;							//choropleth map: Maps representing categorical data  
+var Temporal_change_in_neighborhoods = true;				//stacked chart: Temporal Change
 var Parallel_Categories_Diagram_in_neighborhoods = true;	//parallel categories diagram
 var Chord_Diagram_in_neighborhoods = true;					//chord diagram
   
