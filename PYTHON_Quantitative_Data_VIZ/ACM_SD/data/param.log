@@ -1,0 +1,14 @@
+2020-10-16 19:06:26
+  {'NumOfMaps': 4,
+   'chart': 'Parallel Coordinates Plot',
+   'filename_suffix': 'SD',
+   'label': 'short_name',
+   'msa_fips': '31080',
+   'title': 'Adaptive Choropleth Mapper',
+   'variables': ['p_nonhisp_white_persons',
+                 'p_nonhisp_black_persons',
+                 'p_hispanic_persons',
+                 'p_asian_persons',
+                 'median_household_income',
+                 'p_household_recent_move'],
+   'year': 2000}

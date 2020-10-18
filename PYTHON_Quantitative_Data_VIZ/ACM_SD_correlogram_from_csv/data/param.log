@@ -1,0 +1,15 @@
+2020-10-16 22:12:35
+  {'NumOfMaps': 6,
+   'chart': 'Correlogram',
+   'filename_suffix': 'SD_correlogram_from_csv',
+   'inputCSV': 'attributes/San_Diego_variables.csv',
+   'label': 'short_name',
+   'shapefile': 'shp/San_Diego.shp',
+   'title': 'Adaptive Choropleth Mapper with Correlogram',
+   'variables': ['p_other_language',
+                 'p_female_headed_families',
+                 'median_income_blackhh',
+                 'median_income_hispanichh',
+                 'median_income_asianhh',
+                 'per_capita_income'],
+   'year': 2000}
