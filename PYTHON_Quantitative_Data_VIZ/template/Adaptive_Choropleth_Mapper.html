@@ -106,7 +106,7 @@
 			</table>
 		</div>	
 	</div>
-	<div id="global-message" style="margin: 0px 160px; width:1100px; color:blue; font-size: smaller; clear:both;" hidden><i>The selections above are valid only after you click "Set Globally" button. To enable "Set Globally", make all maps have the same extents by clicking one of "Sync" buttons below.</i></div>
+	<div id="global-message" style="margin: 0px 160px; width:1100px; color:blue; font-size: smaller; clear:both;" hidden><i>The selections above are valid only after you click "Set Globally" button. To enable "Set Globally", make all maps have the same extents by clicking one of "Link" buttons below.</i></div>
 	</section>
 	
 	<br><br>
@@ -160,7 +160,7 @@ var app={
 	values: [],                                  // global area for the values of title index [L001, L002, ....]
 	labdic: {},                                  // key: values[n], value: titles[n]
 	titdic: {},                                  // key: titles[n], value: values[n]
-	inputType: '',                               // input type from web page (ex 'Sync button', :Set Globally button' ... )
+	inputType: '',                               // input type from web page (ex 'Link button', :Set Globally button' ... )
 	receivedGeoJSON: null,                       // global area for full GeoJSON data from the server
 	selectedGeoJSON: null,                       // global area for selected GeoJSON data from full GeoJSON data
 	selectedBounds : null,                       // global area for map bounds when selected GeoJSON data update
@@ -369,7 +369,7 @@ function draw_titlemap(mIDX, layer) {
 	html_syncbtn += '  <label for="'+mIDX+'_manual">' + leaveGroup + '</label>';
 	html_syncbtn += '</span>';
 	html_syncbtn += '<span style="' + fontSize + '">&nbsp;&nbsp;&nbsp;&nbsp;</span>';
-	html_syncbtn += '<button id="'+mIDX+'_syncbtn" type="button">Sync</button>'
+	html_syncbtn += '<button id="'+mIDX+'_syncbtn" type="button">Link</button>'
 	$("#"+mIDX+" .map_sync").html(html_syncbtn);
 
 	if (app.MapWidth.replace('px','') < 600) $("#"+mIDX+"_nPolygon").hide();
@@ -845,7 +845,7 @@ function draw_globalSelection() {
 	// set check box of 'global_join' 
 	var html_join = '<span style="font-size: 80%;">' +
 					'	 <input id="globalJoin" type="checkbox" name="join_checkbox" value="groupingAuto">' +
-					'    <label for="globalJoin" style="color:gray;">Link</label>' + 
+					'    <label for="globalJoin" style="color:gray;">Link All</label>' + 
 					'</span>';
 	$("#global_join").html(html_join);
 	app.globalJoin = $('input[type=checkbox][id="globalJoin"]').is(":checked");
@@ -1015,7 +1015,7 @@ function globalHeadingRestore() {
 		message = 'Your selection in ' + message.substring(0, message.length-2) + ' ';
 		message += be + ' not valid because you have not clicked "Set Globally" button.\n\n';
 		message += 'To enable "Set Globally" button, ';
-		message += 'make all maps have the same extents by clicking one of "Sync" buttons on the top of each map.';
+		message += 'make all maps have the same extents by clicking one of "Link" buttons on the top of each map.';
 		swal({
 			title: "Attention!",
 			text: message,
@@ -2806,8 +2806,8 @@ function paintParcoords({lassoData="", lassoedMap="", eventData="", globalJoin=n
 		var html = '';
 		html += '<div style="padding:60px 50px; color:blue">';
 		html += '<i>';
-		html += 'This scatter chart is shown only when all maps have the same extent.<br><br>';
-		html += '"Sync", "Join group" and "Grouping All" can be used to make maps have the same extent.';
+		html += 'This is shown only when all maps have the same extent.<br><br>';
+		html += '"Link", "Join group" and "Link All" can be used to make maps have the same extent.';
 		html += '</i>';
 		html += '</div>';
 		//$("#chart_ParallelCoordinates").html(html);
@@ -3409,8 +3409,8 @@ function paintScatter(map0="map0", map1="map1", {lassoData="", eventData="", glo
 		var html = '';
 		html += '<div style="padding:60px 50px; color:blue">';
 		html += '<i>';
-		html += 'This scatter chart is shown only when all maps have the same extent.<br><br>';
-		html += '"Sync", "Join group" and "Grouping All" can be used to make maps have the same extent.';
+		html += 'This chart is shown only when all maps have the same extent.<br><br>';
+		html += '"Link", "Join group" and "Link All" can be used to make maps have the same extent.';
 		html += '</i>';
 		html += '</div>';
 		$("#chart_scatter").html(html);
