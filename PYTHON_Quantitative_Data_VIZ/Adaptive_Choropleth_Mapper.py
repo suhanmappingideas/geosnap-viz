@@ -90,7 +90,7 @@ def write_CONFIG_js(param):
     
     # Automatically set Map_width, Map_height. 
     Map_width = "350px"
-    Map_height = "300px"
+    Map_height = "350px"
     if (NumOfMaps <= 5):
         Map_width = "400px"
         Map_height = "400px"
@@ -122,16 +122,20 @@ def write_CONFIG_js(param):
     contents = contents.replace('var Map_height = "400px";', Map_height)
     
     chart = param['chart'] if 'chart' in param else ''
+    #print('chart: ' + chart )
+    #print(chart == "Stacked Chart")
+    
     Stacked_Chart = "var Stacked_Chart = false;"
     Correlogram = "var Correlogram = false;"
     Scatter_Plot = "var Scatter_Plot = false;"
     Parallel_Coordinates_Plot = "var Parallel_Coordinates_Plot = false;"
+    
     if (chart == "Stacked Chart"): Stacked_Chart = "var Stacked_Chart = true;"
     elif (chart == "Correlogram"): Correlogram = "var Correlogram = true;"
     elif (chart == "Scatter Plot"): Scatter_Plot = "var Scatter_Plot = true;"
     elif (chart == "Parallel Coordinates Plot"): Parallel_Coordinates_Plot = "var Parallel_Coordinates_Plot = true;"
-    #else: Stacked_Chart = "var Stacked_Chart = true;"
-
+    else: Stacked_Chart = "var Stacked_Chart = false;"
+   
     contents = contents.replace("var Stacked_Chart = false;", Stacked_Chart)
     contents = contents.replace("var Correlogram = false;", Correlogram)
     contents = contents.replace("var Scatter_Plot = false;", Scatter_Plot)
@@ -286,11 +290,17 @@ def Adaptive_Choropleth_Mapper_viz(param):
             except KeyError:
                 #print("Tract ID [{}] is not found in the shape file {}".format(tractid, param['shapefile']))
                 geometry.append(None)
-        community.gdf.insert(len(community.gdf.columns), "geometry", geometry)
+       # print( "geometry" in community.gdf )        
+        #f hasattr(community.gdf, "geoemtry"):
+        #if (community.gdf["geoemtry"] is None):
+        #   pass 
+        #else:
+        if(("geometry" in community.gdf) == False):
+            community.gdf.insert(len(community.gdf.columns), "geometry", geometry)
 ################################################################################################################      
     
     community.gdf = community.gdf.replace([np.inf, -np.inf], np.nan)
-    # check if geometry is not null for Spatial Clustering
+    # check if geometry is not null for Spatial Clustering  
     community.gdf = community.gdf[pd.notnull(community.gdf['geometry'])]
     #print(community.gdf)
 
@@ -352,7 +362,7 @@ if __name__ == '__main__':
     started_datetime = datetime.now()
     dateYYMMDD = started_datetime.strftime('%Y%m%d')
     timeHHMMSS = started_datetime.strftime('%H%M%S')
-    print('GEOSNAP2ACM start at %s %s' % (started_datetime.strftime('%Y-%m-%d'), started_datetime.strftime('%H:%M:%S')))
+    print('This program started at %s %s' % (started_datetime.strftime('%Y-%m-%d'), started_datetime.strftime('%H:%M:%S')))
     
     #sample = "downloads/LTDB_Std_All_Sample.zip"
     #full = "downloads/LTDB_Std_All_fullcount.zip"
@@ -360,7 +370,7 @@ if __name__ == '__main__':
     #store_census()
     #geosnap.io.store_census()
     
-    param_geosnap = {
+    param = {
             'title': "Adaptive Choropleth Mapper with Correlogram",
             'filename_suffix': "SD_correlogram",
             'state_fips': None,
@@ -382,7 +392,7 @@ if __name__ == '__main__':
     input_attributes = pd.read_csv("attributes/Copy of San_Diego_ACS_2010.csv", dtype={'geoid':str})
     shapefile = gpd.read_file("shp/San_Diego2010.shp")
 
-    param = {
+    param2 = {
             'title': "Adaptive Choropleth Mapper with Correlogram",
             'filename_suffix': "SD_correlogram_from_csv",
             'inputCSV': input_attributes,   
@@ -397,16 +407,19 @@ if __name__ == '__main__':
                 "median_income_asianhh",
                 "per_capita_income",     
             ],
-            'chart': "Correlogram",
-            'label': "short_name",        
+            'label': "short_name",                                       # variable, short_name or full_name
+            #'chart': "Stacked Chart",    
+            #'chart': "Correlogram",
+            #'chart': "Scatter Plot",   
+            #'chart': "Parallel Coordinates Plot",       
     }
     
-    Adaptive_Choropleth_Mapper_viz(param)
+    Adaptive_Choropleth_Mapper_viz(param2)
     
     ended_datetime = datetime.now()
     elapsed = ended_datetime - started_datetime
     total_seconds = int(elapsed.total_seconds())
     hours, remainder = divmod(total_seconds,60*60)
     minutes, seconds = divmod(remainder,60)    
-    print('GEOSNAP2ACM ended at %s %s    Elapsed %02d:%02d:%02d' % (ended_datetime.strftime('%Y-%m-%d'), ended_datetime.strftime('%H:%M:%S'), hours, minutes, seconds))
+    print('This program ended at %s %s    Elapsed %02d:%02d:%02d' % (ended_datetime.strftime('%Y-%m-%d'), ended_datetime.strftime('%H:%M:%S'), hours, minutes, seconds))
     

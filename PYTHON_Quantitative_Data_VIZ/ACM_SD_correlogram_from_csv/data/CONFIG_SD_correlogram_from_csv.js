@@ -2,7 +2,7 @@
 var NumOfMaps = 6;
 
 //Define variables that you want to visualize at initial views. For example, enter five variables when the NumOfMaps is equal to 5.
-var InitialLayers = ["2000 % white (non-Hispanic)", "2000 % black (non-Hispanic)", "2000 % Hispanic", "2000 % Native American race", "2000 % Asian and Pacific Islander race", "2000 % Hawaiian race", "2000 % Indian birth/race", "2000 % Chinese birth/race", "2000 % Filipino birth/race", "2000 % Japanese birth/race", "2000 % Korean birth/race", "2000 % speaking other language at home (age 5+)", "2000 % female-headed families with children", "2000 Median HH income (blacks)", "2000 Median HH income (Hispanics)", "2000 Median HH income (Asian/ Pacific Islanders)", "2000 Per capita income"];
+var InitialLayers = ["2000 % speaking other language at home (age 5+)", "2000 % female-headed families with children", "2000 Median HH income (blacks)", "2000 Median HH income (Hispanics)", "2000 Median HH income (Asian/ Pacific Islanders)", "2000 Per capita income"];
 
 /*Define initial map center and zoom level below. Map Extent and Zoom level will be automatically adjusted when you do not define map center and zoom level. Double-slashes  in the front need to be deleted to make them effective*/
 //var Initial_map_center = [34.0522, -117.9];  
@@ -12,7 +12,7 @@ var InitialLayers = ["2000 % white (non-Hispanic)", "2000 % black (non-Hispanic)
    It appears only when the map extent and the class intervals of all maps are same.
    To make all maps have the same map extent and class intervals, enable "Grouping All" or click "Sync" on one of maps   */
 var Stacked_Chart = false;
-var Correlogram = true;
+var Correlogram = false;
 var Scatter_Plot = false;
 var Parallel_Coordinates_Plot = false;
 

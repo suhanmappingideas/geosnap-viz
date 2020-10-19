@@ -237,7 +237,7 @@ if __name__ == '__main__':
         'Chord_Diagram_in_neighborhoods': False
     }
     
-    Clustering_viz(param)
+    #Clustering_viz(param)
     ended_datetime = datetime.now()
     elapsed = ended_datetime - started_datetime
     total_seconds = int(elapsed.total_seconds())
