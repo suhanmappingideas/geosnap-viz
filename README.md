@@ -73,7 +73,7 @@ Run Jupyter notebook examples below to learn how to use GEOSNAP2ACM and GEOSNAP2
 
  1. NAM_SD_eveything : The output of GEOSNAP2NAM.ipynb 
 <br />This example visualizes all charts and maps including the result of sequence analysis. Visualizing everything like this creates too many maps and charts. So it is hard to understand what is what. From this reason, charts and maps are divided into the four examples of output visualization below
-<br />Video demo: http://173.255.192.133/~suhan/videos/NAM_SD_everything
+<br />Video demo: http://su-gis.iptime.org/GEOSNAP/NAM_SD_everything
 
  2. NAM_US_0_INC: The output of GEOSNAP2NAM0_INC_whole.ipynb 
 <br />This example computes INC value of all metro areas in the US and visualize the result using the Adaptive Choropleth Mapper (ACM). Please note that metro id is displayed on the top right corner of the map. The metro id can be used to create each of map visualization below from #3 to #6. Note: This is computing intensive. Once you run it, you will see the program bar -0.1%, which means that it is querying the data (takes 2 - 3 minutes). Once the querying is done, the progress bar shows how much percent the computation is done.
