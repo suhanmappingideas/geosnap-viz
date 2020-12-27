@@ -80,19 +80,19 @@ Run Jupyter notebook examples below to learn how to use GEOSNAP2ACM and GEOSNAP2
 
  3. NAM_SD_1_neighborhood : The output of  GEOSNAP2NAM1_neighborhood.ipynb 
 <br />This example visualizes the spatiotemporal change of neighborhood (clustering result)
-<br />Video demo: http://173.255.192.133/~suhan/videos/NAM_SD_1_neighborhood
+<br />Video demo: http://su-gis.iptime.org/GEOSNAP/NAM_SD_1_neighborhood
 
  4. NAM_SD_2_INC_neighborhood : The output of GEOSNAP2NAM2_INC_neighborhood.ipynb
 <br />This example visualizes a map of the index of neighborhood change with maps showing the spatiotemporal change of neighborhood.
-<br /> Video demo: http://173.255.192.133/~suhan/videos/NAM_SD_2_INC_neighborhood
+<br /> Video demo: http://su-gis.iptime.org/GEOSNAP/NAM_SD_2_INC_neighborhood
 
  5. NAM_SD_3_sequence_neighborhood_categoriesDiagram : The output of  GEOSNAP2NAM3_sequence_neighborhood_categoriesDiagram.ipynb
 <br />This example visualizes the parallel categorical diagram with maps showing the spatiotemporal change of neighborhood.
-<br />Video demo: http://173.255.192.133/~suhan/videos/NAM_SD_3_sequence_neighborhood_categoriesDiagram
+<br />Video demo: http://su-gis.iptime.org/GEOSNAP/NAM_SD_3_sequence_neighborhood_categoriesDiagram
 
  6. NAM_SD_4_sequence_neighborhood_chordDiagram : The output of GEOSNAP2NAM4_sequence_neighborhood_chordDiagram.ipynb
 <br />This example visualizes the chord diagram with maps showing the spatiotemporal change of neighborhood. 
-<br /> Video demo: http://173.255.192.133/~suhan/videos/NAM_SD_4_sequence_neighborhood_chordDiagram
+<br /> Video demo: http://su-gis.iptime.org/GEOSNAP/NAM_SD_4_sequence_neighborhood_chordDiagram
 
  
 In the source code, the lines below should be executed only for the first run to write LTDB data downloaded in the previous step to your disk. The lines below are commented out. Remove # in each of the lines and comment out again after the first run. This process takes about 10 - 15 minutes. But you do not need to repeat it from the second run.
