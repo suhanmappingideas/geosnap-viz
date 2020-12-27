@@ -45,7 +45,7 @@ First-time users need to download LTDB data which are input for both GEOSNAP2ACM
 
 ### Getting Started
 
-Run Jupyter notebook examples below to learn how to use GEOSNAP2ACM and GEOSNAP2NAN. Each folder has example output like below.
+Run Jupyter notebook examples below to learn how to use GEOSNAP2ACM and GEOSNAP2NAM. Each folder has example output like below.
 #### GEOSNAP2ACM 
  1. ACM_SD_ACM_only : The output of ACM_only.ipynb. 
 <br />It visualizes selected variables by using Adaptive Choropleth Mapper.
