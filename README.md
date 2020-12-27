@@ -53,12 +53,12 @@ Run Jupyter notebook examples below to learn how to use GEOSNAP2ACM and GEOSNAP2
 
  2. ACM_SD_correlogram: The output of ACM_correlogram.ipynb. 
 <br />It visualizes the matrix of scatter plots.
-<br />Video demo: http://173.255.192.133/~suhan/videos/ACM_SD_correlogram_1
-<br />Advanced options: http://173.255.192.133/~suhan/videos/ACM_SD_correlogram_2
+<br />Video demo: http://su-gis.iptime.org/GEOSNAP/ACM_SD_correlogram_1
+<br />Advanced options: http://su-gis.iptime.org/GEOSNAP/ACM_SD_correlogram_2
 
  3. ACM_SD_Scatter : The output of  ACM_ScatterPlot.ipynb. 
 <br />It visualizes only two scatter plots, but it has more interactive features than ACM_correlogram.
-<br />Video demo: http://173.255.192.133/~suhan/videos/ACM_SD_Scatter_1
+<br />Video demo: http://su-gis.iptime.org/GEOSNAP/ACM_SD_Scatter_1
 
  4. ACM_SD_TimeSeries : The output of ACM_TimeSeries.ipynb
 <br />It visualizes the temporal change of the selected variables. 
